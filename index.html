@@ -1,0 +1,1109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hat Size Calculator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202326;
+      --muted: #65707a;
+      --line: #d8dee3;
+      --paper: #fbfaf7;
+      --panel: #ffffff;
+      --accent: #146c63;
+      --accent-strong: #0c514a;
+      --accent-soft: #dcefed;
+      --gold: #b27a20;
+      --rose: #a84949;
+      --shadow: 0 18px 55px rgba(32, 35, 38, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(20, 108, 99, 0.10), transparent 42%),
+        linear-gradient(315deg, rgba(178, 122, 32, 0.12), transparent 38%),
+        var(--paper);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.4rem);
+      line-height: 0.98;
+      letter-spacing: 0;
+      max-width: 720px;
+    }
+
+    header p {
+      margin: 0 0 6px;
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(310px, 420px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(216, 222, 227, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 20px;
+    }
+
+    .control {
+      display: grid;
+      gap: 9px;
+      margin-bottom: 18px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    label,
+    .field-title {
+      font-weight: 720;
+      font-size: 0.95rem;
+    }
+
+    output,
+    .hint {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input[type="number"] {
+      padding: 0 12px;
+    }
+
+    input[type="range"] {
+      min-height: 44px;
+      accent-color: var(--accent);
+    }
+
+    select {
+      padding: 0 12px;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 3px solid rgba(20, 108, 99, 0.24);
+      outline-offset: 2px;
+      border-color: var(--accent);
+    }
+
+    .unit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mode-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 46px;
+    }
+
+    .mode-row input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mode-row label {
+      display: grid;
+      place-items: center;
+      min-height: 46px;
+      cursor: pointer;
+      border-right: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .mode-row label:last-child {
+      border-right: 0;
+    }
+
+    .mode-row input:checked + span {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .mode-row span {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 0 8px;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .result {
+      min-height: 104px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .result span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .result strong {
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(1.35rem, 3vw, 2.1rem);
+      line-height: 1;
+    }
+
+    .result small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .visual {
+      min-height: 620px;
+      padding: 20px;
+      display: grid;
+      grid-template-rows: minmax(320px, 1fr) auto;
+      gap: 16px;
+    }
+
+    .diagram-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 360px;
+      border: 1px solid rgba(216, 222, 227, 0.8);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(216, 222, 227, 0.45) 1px, transparent 1px),
+        linear-gradient(rgba(216, 222, 227, 0.45) 1px, transparent 1px),
+        #fff;
+      background-size: 28px 28px;
+      overflow: hidden;
+    }
+
+    .pattern-panel {
+      margin-top: 18px;
+      padding: 20px;
+    }
+
+    .pattern-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .pattern-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.2;
+    }
+
+    .pattern-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 720px;
+    }
+
+    .pattern-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      min-height: 44px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 0 14px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--accent-strong);
+    }
+
+    button:focus {
+      outline: 3px solid rgba(20, 108, 99, 0.24);
+      outline-offset: 2px;
+    }
+
+    .pattern-settings {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pattern-stage {
+      border: 1px solid rgba(216, 222, 227, 0.9);
+      border-radius: 8px;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .pattern-stage svg {
+      min-width: 920px;
+      height: 620px;
+      display: block;
+      background:
+        linear-gradient(90deg, rgba(216, 222, 227, 0.38) 1px, transparent 1px),
+        linear-gradient(rgba(216, 222, 227, 0.38) 1px, transparent 1px),
+        #fff;
+      background-size: 24px 24px;
+    }
+
+    .pattern-cut {
+      fill: rgba(20, 108, 99, 0.10);
+      stroke: var(--accent-strong);
+      stroke-width: 2.5;
+    }
+
+    .pattern-seam {
+      fill: none;
+      stroke: var(--rose);
+      stroke-width: 2;
+      stroke-dasharray: 8 6;
+    }
+
+    .pattern-brim {
+      fill: rgba(178, 122, 32, 0.14);
+      stroke: var(--gold);
+      stroke-width: 2.5;
+    }
+
+    .pattern-label {
+      fill: var(--ink);
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .pattern-small {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .pattern-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    svg {
+      width: 100%;
+      height: min(58vh, 520px);
+      min-height: 340px;
+    }
+
+    .hat-body {
+      fill: rgba(20, 108, 99, 0.14);
+      stroke: var(--accent-strong);
+      stroke-width: 3;
+    }
+
+    .brim {
+      fill: rgba(178, 122, 32, 0.18);
+      stroke: var(--gold);
+      stroke-width: 3;
+    }
+
+    .guide {
+      stroke: #7f8b94;
+      stroke-width: 2;
+      stroke-dasharray: 7 7;
+    }
+
+    .measure {
+      stroke: var(--rose);
+      stroke-width: 2.5;
+      marker-start: url(#arrow);
+      marker-end: url(#arrow);
+    }
+
+    .measure-text {
+      fill: var(--ink);
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+    }
+
+    .note {
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: #1d3936;
+      line-height: 1.5;
+    }
+
+    .formula {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .formula code {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    @media (max-width: 880px) {
+      header,
+      .app,
+      .pattern-settings,
+      .pattern-summary,
+      .notes {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        display: grid;
+        align-items: start;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .visual {
+        min-height: auto;
+      }
+
+      .pattern-header {
+        display: grid;
+        align-items: start;
+      }
+
+      .pattern-actions {
+        justify-content: start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        padding: 18px 0;
+      }
+
+      .controls,
+      .visual,
+      .pattern-panel {
+        padding: 14px;
+      }
+
+      .unit-grid,
+      .mode-row {
+        grid-template-columns: 1fr;
+      }
+
+      .mode-row label {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .mode-row label:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Hat size calculator</h1>
+      </div>
+      <p>Enter the top diameter and height, then adjust the side taper and brim to calculate the bottom opening and outer brim size.</p>
+    </header>
+
+    <section class="app" aria-label="Interactive hat calculator">
+      <form class="panel controls" id="hatForm">
+        <div class="control">
+          <label for="unit">Units</label>
+          <select id="unit" name="unit">
+            <option value="cm">Centimetres</option>
+            <option value="in">Inches</option>
+            <option value="mm">Millimetres</option>
+          </select>
+        </div>
+
+        <div class="unit-grid">
+          <div class="control">
+            <div class="label-row">
+              <label for="topDiameter">Top diameter</label>
+              <output id="topOut">16.0 cm</output>
+            </div>
+            <input id="topDiameter" name="topDiameter" type="number" min="0.1" step="0.1" value="16">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <label for="height">Hat height</label>
+              <output id="heightOut">12.0 cm</output>
+            </div>
+            <input id="height" name="height" type="number" min="0.1" step="0.1" value="12">
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="field-title">Side shape</div>
+          <div class="mode-row" role="radiogroup" aria-label="Side shape presets">
+            <label>
+              <input type="radio" name="preset" value="-5">
+              <span>Tapered</span>
+            </label>
+            <label>
+              <input type="radio" name="preset" value="0" checked>
+              <span>Straight</span>
+            </label>
+            <label>
+              <input type="radio" name="preset" value="8">
+              <span>Flared</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="label-row">
+            <label for="taperAngle">Taper / flair angle</label>
+            <output id="angleOut">0°</output>
+          </div>
+          <input id="taperAngle" name="taperAngle" type="range" min="-20" max="30" step="0.5" value="0">
+          <div class="hint">Negative narrows toward the bottom. Positive flares outward toward the bottom.</div>
+        </div>
+
+        <div class="control">
+          <div class="label-row">
+            <label for="brimWidth">Brim width</label>
+            <output id="brimOut">4.0 cm</output>
+          </div>
+          <input id="brimWidth" name="brimWidth" type="range" min="0" max="20" step="0.1" value="4">
+        </div>
+
+        <div class="results" aria-live="polite">
+          <div class="result">
+            <span>Bottom diameter</span>
+            <strong id="bottomResult">16.0 cm</strong>
+            <small id="bottomCirc">Circumference 50.3 cm</small>
+          </div>
+          <div class="result">
+            <span>Outer brim diameter</span>
+            <strong id="outerResult">24.0 cm</strong>
+            <small id="outerCirc">Outer circumference 75.4 cm</small>
+          </div>
+          <div class="result">
+            <span>Brim material area</span>
+            <strong id="areaResult">251.3 cm²</strong>
+            <small>Flat annulus estimate</small>
+          </div>
+        </div>
+      </form>
+
+      <section class="panel visual" aria-label="Hat diagram and calculation details">
+        <div class="diagram-wrap">
+          <svg id="diagram" viewBox="0 0 720 520" role="img" aria-labelledby="diagramTitle diagramDesc">
+            <title id="diagramTitle">Scaled hat cross-section diagram</title>
+            <desc id="diagramDesc">A cross-section showing top diameter, height, bottom diameter, and brim width.</desc>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#a84949"></path>
+              </marker>
+            </defs>
+            <g id="diagramLayer"></g>
+          </svg>
+        </div>
+
+        <div class="notes">
+          <div class="note">
+            Top diameter and height alone do not determine the bottom diameter. This calculator uses the side angle as the missing measurement.
+          </div>
+          <div class="formula">
+            <div><code>bottom = top + 2 × height × tan(angle)</code></div>
+            <div><code>outer brim = bottom + 2 × brim width</code></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel pattern-panel" aria-label="Cutting pattern generator">
+      <div class="pattern-header">
+        <div>
+          <h2>Cutting pattern generator</h2>
+          <p>Generate flat pattern pieces for the crown side, top circle, and brim ring. Dashed red lines show seam allowance.</p>
+        </div>
+        <div class="pattern-actions">
+          <button type="button" class="secondary" id="fitPattern">Fit preview</button>
+          <button type="button" id="downloadPattern">Download SVG</button>
+        </div>
+      </div>
+
+      <div class="pattern-settings">
+        <div class="control">
+          <label for="seamAllowance">Seam allowance</label>
+          <input id="seamAllowance" name="seamAllowance" type="number" min="0" step="0.1" value="1">
+        </div>
+        <div class="control">
+          <label for="patternScale">Preview scale</label>
+          <select id="patternScale" name="patternScale">
+            <option value="auto">Auto fit</option>
+            <option value="10">10 px per unit</option>
+            <option value="15">15 px per unit</option>
+            <option value="20">20 px per unit</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="joinOverlap">Side seam overlap</label>
+          <input id="joinOverlap" name="joinOverlap" type="number" min="0" step="0.1" value="0">
+        </div>
+        <div class="control">
+          <label for="notches">Alignment notches</label>
+          <select id="notches" name="notches">
+            <option value="4">4 notches</option>
+            <option value="8">8 notches</option>
+            <option value="0">None</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pattern-stage">
+        <svg id="patternSvg" viewBox="0 0 1120 620" role="img" aria-labelledby="patternTitle patternDesc">
+          <title id="patternTitle">Hat material cutting pattern</title>
+          <desc id="patternDesc">Flat pattern pieces for the hat crown, top circle, and brim.</desc>
+          <g id="patternLayer"></g>
+        </svg>
+      </div>
+
+      <div class="pattern-summary" aria-live="polite">
+        <div class="result">
+          <span>Crown side</span>
+          <strong id="sidePatternResult">Rectangle</strong>
+          <small id="sidePatternDetail">Width 50.3 cm, height 12.0 cm</small>
+        </div>
+        <div class="result">
+          <span>Top piece</span>
+          <strong id="topPatternResult">16.0 cm</strong>
+          <small id="topPatternDetail">Cut circle plus seam allowance</small>
+        </div>
+        <div class="result">
+          <span>Brim piece</span>
+          <strong id="brimPatternResult">24.0 cm</strong>
+          <small id="brimPatternDetail">Outer ring with 16.0 cm opening</small>
+        </div>
+        <div class="result">
+          <span>Seam allowance</span>
+          <strong id="seamResult">1.0 cm</strong>
+          <small>Dashed red outline</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#hatForm");
+    const els = {
+      unit: document.querySelector("#unit"),
+      top: document.querySelector("#topDiameter"),
+      height: document.querySelector("#height"),
+      angle: document.querySelector("#taperAngle"),
+      brim: document.querySelector("#brimWidth"),
+      topOut: document.querySelector("#topOut"),
+      heightOut: document.querySelector("#heightOut"),
+      angleOut: document.querySelector("#angleOut"),
+      brimOut: document.querySelector("#brimOut"),
+      bottomResult: document.querySelector("#bottomResult"),
+      bottomCirc: document.querySelector("#bottomCirc"),
+      outerResult: document.querySelector("#outerResult"),
+      outerCirc: document.querySelector("#outerCirc"),
+      areaResult: document.querySelector("#areaResult"),
+      layer: document.querySelector("#diagramLayer"),
+      seamAllowance: document.querySelector("#seamAllowance"),
+      patternScale: document.querySelector("#patternScale"),
+      joinOverlap: document.querySelector("#joinOverlap"),
+      notches: document.querySelector("#notches"),
+      patternSvg: document.querySelector("#patternSvg"),
+      patternLayer: document.querySelector("#patternLayer"),
+      fitPattern: document.querySelector("#fitPattern"),
+      downloadPattern: document.querySelector("#downloadPattern"),
+      sidePatternResult: document.querySelector("#sidePatternResult"),
+      sidePatternDetail: document.querySelector("#sidePatternDetail"),
+      topPatternResult: document.querySelector("#topPatternResult"),
+      topPatternDetail: document.querySelector("#topPatternDetail"),
+      brimPatternResult: document.querySelector("#brimPatternResult"),
+      brimPatternDetail: document.querySelector("#brimPatternDetail"),
+      seamResult: document.querySelector("#seamResult")
+    };
+
+    let latestValues = null;
+
+    const unitArea = {
+      cm: "cm²",
+      in: "in²",
+      mm: "mm²"
+    };
+
+    function numberValue(input, fallback) {
+      const value = Number(input.value);
+      return Number.isFinite(value) && value > 0 ? value : fallback;
+    }
+
+    function format(value, unit, decimals = 1) {
+      return `${value.toFixed(decimals)} ${unit}`;
+    }
+
+    function formatArea(value, unit) {
+      return `${value.toFixed(1)} ${unitArea[unit]}`;
+    }
+
+    function setLine(x1, y1, x2, y2, className) {
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${className}"></line>`;
+    }
+
+    function setText(x, y, text, anchor = "middle") {
+      return `<text x="${x}" y="${y}" text-anchor="${anchor}" class="measure-text">${text}</text>`;
+    }
+
+    function polarPoint(cx, cy, radius, angle) {
+      const radians = angle * Math.PI / 180;
+      return {
+        x: cx + radius * Math.cos(radians),
+        y: cy + radius * Math.sin(radians)
+      };
+    }
+
+    function arcPath(cx, cy, radius, startAngle, endAngle, clockwise = true) {
+      const start = polarPoint(cx, cy, radius, startAngle);
+      const end = polarPoint(cx, cy, radius, endAngle);
+      const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+      const sweep = clockwise ? 1 : 0;
+      return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
+    }
+
+    function annularSectorPath(cx, cy, innerRadius, outerRadius, startAngle, endAngle) {
+      const outerStart = polarPoint(cx, cy, outerRadius, startAngle);
+      const outerEnd = polarPoint(cx, cy, outerRadius, endAngle);
+      const innerEnd = polarPoint(cx, cy, innerRadius, endAngle);
+      const innerStart = polarPoint(cx, cy, innerRadius, startAngle);
+      const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+      return [
+        `M ${outerStart.x} ${outerStart.y}`,
+        `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
+        `L ${innerEnd.x} ${innerEnd.y}`,
+        `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y}`,
+        "Z"
+      ].join(" ");
+    }
+
+    function circlePath(cx, cy, radius) {
+      return [
+        `M ${cx - radius} ${cy}`,
+        `A ${radius} ${radius} 0 1 0 ${cx + radius} ${cy}`,
+        `A ${radius} ${radius} 0 1 0 ${cx - radius} ${cy}`,
+        "Z"
+      ].join(" ");
+    }
+
+    function ringPath(cx, cy, innerRadius, outerRadius) {
+      return `${circlePath(cx, cy, outerRadius)} ${circlePath(cx, cy, innerRadius)}`;
+    }
+
+    function notchLinesForCircle(cx, cy, radius, count) {
+      if (!count) return "";
+      let lines = "";
+      for (let i = 0; i < count; i += 1) {
+        const angle = i * 360 / count;
+        const outer = polarPoint(cx, cy, radius + 8, angle);
+        const inner = polarPoint(cx, cy, radius - 8, angle);
+        lines += `<line x1="${inner.x}" y1="${inner.y}" x2="${outer.x}" y2="${outer.y}" class="guide"></line>`;
+      }
+      return lines;
+    }
+
+    function notchLinesForArc(cx, cy, radius, startAngle, endAngle, count) {
+      if (!count) return "";
+      let lines = "";
+      for (let i = 0; i <= count; i += 1) {
+        const angle = startAngle + (endAngle - startAngle) * (i / count);
+        const outer = polarPoint(cx, cy, radius + 7, angle);
+        const inner = polarPoint(cx, cy, radius - 7, angle);
+        lines += `<line x1="${inner.x}" y1="${inner.y}" x2="${outer.x}" y2="${outer.y}" class="guide"></line>`;
+      }
+      return lines;
+    }
+
+    function multilineText(x, y, lines, className = "pattern-small", anchor = "start", lineHeight = 18) {
+      return lines.map((line, index) => (
+        `<text x="${x}" y="${y + index * lineHeight}" text-anchor="${anchor}" class="${className}">${line}</text>`
+      )).join("");
+    }
+
+    function sectorBounds(innerRadius, outerRadius, startAngle, endAngle) {
+      const angles = [startAngle, endAngle];
+      for (let angle = -360; angle <= 360; angle += 90) {
+        if (angle >= startAngle && angle <= endAngle) {
+          angles.push(angle);
+        }
+      }
+
+      const points = [];
+      angles.forEach((angle) => {
+        points.push(polarPoint(0, 0, innerRadius, angle));
+        points.push(polarPoint(0, 0, outerRadius, angle));
+      });
+
+      return points.reduce((bounds, point) => ({
+        minX: Math.min(bounds.minX, point.x),
+        minY: Math.min(bounds.minY, point.y),
+        maxX: Math.max(bounds.maxX, point.x),
+        maxY: Math.max(bounds.maxY, point.y)
+      }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+    }
+
+    function buildPatternSvg(values, forDownload = false) {
+      const seam = Math.max(0, Number(els.seamAllowance.value) || 0);
+      const overlap = Math.max(0, Number(els.joinOverlap.value) || 0);
+      const notchCount = Number(els.notches.value) || 0;
+      const topRadius = values.topDiameter / 2;
+      const bottomRadius = values.bottomDiameter / 2;
+      const outerBrimRadius = values.outerDiameter / 2;
+      const slantHeight = Math.sqrt(Math.pow(values.height, 2) + Math.pow(bottomRadius - topRadius, 2));
+      const maxMeasurement = Math.max(values.outerDiameter + seam * 2, Math.PI * Math.max(values.topDiameter, values.bottomDiameter));
+      const manualScale = els.patternScale.value === "auto" ? null : Number(els.patternScale.value);
+      const diff = bottomRadius - topRadius;
+      let scale = !forDownload && manualScale ? manualScale : Math.max(4.5, Math.min(18, 560 / maxMeasurement));
+      if ((forDownload || !manualScale) && Math.abs(diff) >= 0.001) {
+        const largerRadius = Math.max(topRadius, bottomRadius);
+        const outerPatternRadius = slantHeight * largerRadius / Math.abs(diff);
+        const innerPatternRadius = outerPatternRadius - slantHeight;
+        const angle = Math.min(359.5, 360 * largerRadius / outerPatternRadius);
+        const anglePad = seam > 0 ? Math.min(8, seam / outerPatternRadius * 180 / Math.PI) : 0;
+        const rawBounds = sectorBounds(
+          Math.max(0.1, innerPatternRadius - seam),
+          outerPatternRadius + seam,
+          -angle / 2 - anglePad,
+          angle / 2 + anglePad
+        );
+        const rawWidth = rawBounds.maxX - rawBounds.minX;
+        const rawHeight = rawBounds.maxY - rawBounds.minY;
+        scale = Math.min(scale, 360 / rawWidth, 360 / rawHeight);
+      }
+      const unit = values.unit;
+      const pieceGap = 52;
+      const crownX = 72;
+      const crownY = 96;
+      const topCx = 780;
+      const topCy = 172;
+      const brimCx = 790;
+      const brimCy = 430;
+      const labelSuffix = forDownload ? `Generated from ${format(values.topDiameter, unit)} top, ${format(values.height, unit)} height` : "";
+      let crown = "";
+      let crownKind = "Rectangle";
+      let sideDetail = "";
+
+      if (Math.abs(diff) < 0.001) {
+        const width = Math.PI * values.bottomDiameter + overlap;
+        const height = values.height;
+        const x = crownX;
+        const y = crownY;
+        const w = width * scale;
+        const h = height * scale;
+        const seamPx = seam * scale;
+        crown = `
+          <rect x="${x}" y="${y}" width="${w}" height="${h}" class="pattern-cut"></rect>
+          <rect x="${x - seamPx}" y="${y - seamPx}" width="${w + seamPx * 2}" height="${h + seamPx * 2}" class="pattern-seam"></rect>
+          <text x="${x}" y="${y - 18}" class="pattern-label">Crown side</text>
+          <text x="${x}" y="${y + h + 28}" class="pattern-small">Cut 1: ${format(width, unit)} wide × ${format(height, unit)} high</text>
+          <line x1="${x}" y1="${y + h / 2}" x2="${x + w}" y2="${y + h / 2}" class="guide"></line>
+        `;
+        sideDetail = `Width ${format(width, unit)}, height ${format(height, unit)}`;
+      } else {
+        const largerRadius = Math.max(topRadius, bottomRadius);
+        const outerPatternRadius = slantHeight * largerRadius / Math.abs(diff);
+        const innerPatternRadius = outerPatternRadius - slantHeight;
+        const angle = Math.min(359.5, 360 * largerRadius / outerPatternRadius);
+        const start = -angle / 2;
+        const end = angle / 2;
+        const cx = 0;
+        const cy = 0;
+        const inner = innerPatternRadius * scale;
+        const outer = outerPatternRadius * scale;
+        const seamPx = seam * scale;
+        const anglePad = seam > 0 ? Math.min(8, seam / outerPatternRadius * 180 / Math.PI) : 0;
+        const bounds = sectorBounds(Math.max(1, inner - seamPx), outer + seamPx, start - anglePad, end + anglePad);
+        const translateX = crownX - bounds.minX;
+        const translateY = crownY + 70 - bounds.minY;
+        const labelOuter = diff > 0 ? "Bottom edge" : "Top edge";
+        const labelInner = diff > 0 ? "Top edge" : "Bottom edge";
+        const innerEdgeName = diff > 0 ? "Top edge" : "Bottom edge";
+        const outerEdgeName = diff > 0 ? "Bottom edge" : "Top edge";
+        const innerArcLength = 2 * Math.PI * innerPatternRadius * angle / 360;
+        const outerArcLength = 2 * Math.PI * outerPatternRadius * angle / 360;
+        const cutInnerRadius = Math.max(0.1, innerPatternRadius - seam);
+        const cutOuterRadius = outerPatternRadius + seam;
+        const cutAngle = angle + anglePad * 2;
+        const detailLines = [
+          `Finished: inner R ${format(innerPatternRadius, unit)} (${innerEdgeName}), outer R ${format(outerPatternRadius, unit)} (${outerEdgeName})`,
+          `Finished arcs: inner ${format(innerArcLength, unit)}, outer ${format(outerArcLength, unit)}, angle ${angle.toFixed(1)} deg`,
+          `Cut line: inner R ${format(cutInnerRadius, unit)}, outer R ${format(cutOuterRadius, unit)}, angle ${cutAngle.toFixed(1)} deg`
+        ];
+        crownKind = "Curved sector";
+        crown = `
+          <text x="${crownX}" y="52" class="pattern-label">Crown side</text>
+          ${multilineText(crownX, 76, [
+            `Cut 1 annular sector: ${format(slantHeight, unit)} side length`,
+            ...detailLines
+          ])}
+          <g transform="translate(${translateX} ${translateY})">
+            <path d="${annularSectorPath(cx, cy, inner, outer, start, end)}" class="pattern-cut"></path>
+            <path d="${annularSectorPath(cx, cy, Math.max(1, inner - seamPx), outer + seamPx, start - anglePad, end + anglePad)}" class="pattern-seam"></path>
+            ${notchLinesForArc(cx, cy, diff > 0 ? outer : inner, start, end, notchCount)}
+            <text x="${outer + 12}" y="${-10}" class="pattern-small">${labelOuter}</text>
+            <text x="${inner - 8}" y="${18}" text-anchor="end" class="pattern-small">${labelInner}</text>
+          </g>
+        `;
+        sideDetail = `${detailLines[0]}. ${detailLines[1]}.`;
+      }
+
+      const topCutRadius = topRadius * scale;
+      const topSeamRadius = (topRadius + seam) * scale;
+      const brimInner = bottomRadius * scale;
+      const brimOuter = outerBrimRadius * scale;
+      const brimInnerSeam = Math.max(1, (bottomRadius - seam) * scale);
+      const brimOuterSeam = (outerBrimRadius + seam) * scale;
+
+      const topPiece = `
+        <path d="${circlePath(topCx, topCy, topCutRadius)}" class="pattern-cut"></path>
+        <path d="${circlePath(topCx, topCy, topSeamRadius)}" class="pattern-seam"></path>
+        ${notchLinesForCircle(topCx, topCy, topCutRadius, notchCount)}
+        <text x="${topCx}" y="${topCy - topSeamRadius - 18}" text-anchor="middle" class="pattern-label">Top circle</text>
+        <text x="${topCx}" y="${topCy + topSeamRadius + 26}" text-anchor="middle" class="pattern-small">Cut 1: ${format(values.topDiameter, unit)} diameter</text>
+      `;
+
+      const brimPiece = `
+        <path d="${ringPath(brimCx, brimCy, brimInner, brimOuter)}" class="pattern-brim" fill-rule="evenodd"></path>
+        <path d="${ringPath(brimCx, brimCy, brimInnerSeam, brimOuterSeam)}" class="pattern-seam" fill-rule="evenodd"></path>
+        ${notchLinesForCircle(brimCx, brimCy, brimInner, notchCount)}
+        <text x="${brimCx}" y="${brimCy - brimOuterSeam - 18}" text-anchor="middle" class="pattern-label">Brim ring</text>
+        <text x="${brimCx}" y="${brimCy + brimOuterSeam + 26}" text-anchor="middle" class="pattern-small">Cut 1 or 2: ${format(values.outerDiameter, unit)} outer, ${format(values.bottomDiameter, unit)} inner</text>
+      `;
+
+      els.sidePatternResult.textContent = crownKind;
+      els.sidePatternDetail.textContent = sideDetail;
+      els.topPatternResult.textContent = format(values.topDiameter + seam * 2, unit);
+      els.topPatternDetail.textContent = `Includes ${format(seam, unit)} seam allowance`;
+      els.brimPatternResult.textContent = format(values.outerDiameter + seam * 2, unit);
+      els.brimPatternDetail.textContent = `Opening ${format(Math.max(0.1, values.bottomDiameter - seam * 2), unit)} with allowance`;
+      els.seamResult.textContent = format(seam, unit);
+
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" width="1120" height="620">
+          <style>
+            .pattern-cut{fill:rgba(20,108,99,.10);stroke:#0c514a;stroke-width:2.5}
+            .pattern-seam{fill:none;stroke:#a84949;stroke-width:2;stroke-dasharray:8 6}
+            .pattern-brim{fill:rgba(178,122,32,.14);stroke:#b27a20;stroke-width:2.5}
+            .guide{stroke:#7f8b94;stroke-width:2;stroke-dasharray:7 7}
+            .pattern-label{fill:#202326;font:700 15px sans-serif}
+            .pattern-small{fill:#65707a;font:650 12px sans-serif}
+          </style>
+          <rect width="1120" height="620" fill="#fff"></rect>
+          ${labelSuffix ? `<text x="24" y="28" class="pattern-small">${labelSuffix}</text>` : ""}
+          ${crown}
+          ${topPiece}
+          ${brimPiece}
+          <text x="24" y="594" class="pattern-small">Solid line = finished stitch line. Dashed red = cut line with seam allowance. Test with scrap fabric before cutting final material.</text>
+        </svg>
+      `;
+    }
+
+    function updatePresetFromAngle() {
+      const selected = [...form.elements.preset].find((preset) => Number(preset.value) === Number(els.angle.value));
+      form.elements.preset.forEach((preset) => {
+        preset.checked = selected ? preset === selected : false;
+      });
+    }
+
+    function updateDiagram(values) {
+      const maxWidth = Math.max(values.topDiameter, values.bottomDiameter, values.outerDiameter);
+      const scale = Math.min(430 / maxWidth, 300 / values.height);
+      const topW = values.topDiameter * scale;
+      const bottomW = values.bottomDiameter * scale;
+      const outerW = values.outerDiameter * scale;
+      const h = values.height * scale;
+      const cx = 360;
+      const topY = 120;
+      const bottomY = topY + h;
+      const brimY = bottomY + 24;
+      const topL = cx - topW / 2;
+      const topR = cx + topW / 2;
+      const bottomL = cx - bottomW / 2;
+      const bottomR = cx + bottomW / 2;
+      const outerL = cx - outerW / 2;
+      const outerR = cx + outerW / 2;
+      const brimDepth = Math.max(24, Math.min(60, values.brimWidth * scale * 0.55 + 20));
+
+      els.layer.innerHTML = `
+        <path class="brim" d="M ${outerL} ${brimY} Q ${cx} ${brimY + brimDepth} ${outerR} ${brimY} L ${bottomR} ${bottomY} Q ${cx} ${bottomY + brimDepth * 0.36} ${bottomL} ${bottomY} Z"></path>
+        <path class="hat-body" d="M ${topL} ${topY} Q ${cx} ${topY - 26} ${topR} ${topY} L ${bottomR} ${bottomY} Q ${cx} ${bottomY + 28} ${bottomL} ${bottomY} Z"></path>
+        ${setLine(topL, topY - 36, topR, topY - 36, "measure")}
+        ${setLine(cx + Math.max(topW, bottomW) / 2 + 42, topY, cx + Math.max(topW, bottomW) / 2 + 42, bottomY, "measure")}
+        ${setLine(bottomL, bottomY + 58, bottomR, bottomY + 58, "measure")}
+        ${setLine(bottomR, bottomY + 84, outerR, brimY + 84, "measure")}
+        ${setLine(topL, topY, topL, topY - 46, "guide")}
+        ${setLine(topR, topY, topR, topY - 46, "guide")}
+        ${setLine(bottomL, bottomY, bottomL, bottomY + 70, "guide")}
+        ${setLine(bottomR, bottomY, bottomR, bottomY + 96, "guide")}
+        ${setLine(outerR, brimY, outerR, brimY + 96, "guide")}
+        ${setText(cx, topY - 48, `Top ${format(values.topDiameter, values.unit)}`)}
+        ${setText(cx + Math.max(topW, bottomW) / 2 + 58, topY + h / 2, `Height ${format(values.height, values.unit)}`, "start")}
+        ${setText(cx, bottomY + 82, `Bottom ${format(values.bottomDiameter, values.unit)}`)}
+        ${setText((bottomR + outerR) / 2, brimY + 116, `Brim ${format(values.brimWidth, values.unit)}`)}
+      `;
+    }
+
+    function calculate() {
+      const unit = els.unit.value;
+      const topDiameter = numberValue(els.top, 16);
+      const height = numberValue(els.height, 12);
+      const angle = Number(els.angle.value);
+      const brimWidth = Number(els.brim.value);
+      const bottomDiameter = Math.max(0.1, topDiameter + 2 * height * Math.tan(angle * Math.PI / 180));
+      const outerDiameter = bottomDiameter + 2 * brimWidth;
+      const bottomCircumference = Math.PI * bottomDiameter;
+      const outerCircumference = Math.PI * outerDiameter;
+      const brimArea = Math.PI * (Math.pow(outerDiameter / 2, 2) - Math.pow(bottomDiameter / 2, 2));
+      latestValues = { unit, topDiameter, height, bottomDiameter, outerDiameter, brimWidth };
+
+      els.topOut.value = format(topDiameter, unit);
+      els.heightOut.value = format(height, unit);
+      els.angleOut.value = `${angle.toFixed(angle % 1 === 0 ? 0 : 1)}°`;
+      els.brimOut.value = format(brimWidth, unit);
+      els.bottomResult.textContent = format(bottomDiameter, unit);
+      els.bottomCirc.textContent = `Circumference ${format(bottomCircumference, unit)}`;
+      els.outerResult.textContent = format(outerDiameter, unit);
+      els.outerCirc.textContent = `Outer circumference ${format(outerCircumference, unit)}`;
+      els.areaResult.textContent = formatArea(brimArea, unit);
+
+      updateDiagram({ unit, topDiameter, height, bottomDiameter, outerDiameter, brimWidth });
+      els.patternLayer.innerHTML = buildPatternSvg(latestValues).match(/<svg[^>]*>([\s\S]*)<\/svg>/)[1];
+    }
+
+    form.addEventListener("input", (event) => {
+      if (event.target.name === "preset") {
+        els.angle.value = event.target.value;
+      }
+      if (event.target === els.angle) {
+        updatePresetFromAngle();
+      }
+      calculate();
+    });
+
+    [els.seamAllowance, els.patternScale, els.joinOverlap, els.notches].forEach((input) => {
+      input.addEventListener("input", calculate);
+      input.addEventListener("change", calculate);
+    });
+
+    els.fitPattern.addEventListener("click", () => {
+      els.patternScale.value = "auto";
+      calculate();
+    });
+
+    els.downloadPattern.addEventListener("click", () => {
+      if (!latestValues) calculate();
+      const svg = buildPatternSvg(latestValues, true);
+      const blob = new Blob([svg], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "hat-cutting-pattern.svg";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
